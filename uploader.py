@@ -67,7 +67,7 @@ def send_price_to_pvoutput(api_key, system_id, price, now):
 
 # Main CLI command
 @click.command()
-@click.option('--config', 'config_path', default='config.yaml', help='Path to the configuration YAML file.')
+@click.option('--config', 'config_path', default='/config/config.yaml', help='Path to the configuration YAML file.')
 @click.option('--api-key', 'api_key', envvar='PVOUTPUT_API_KEY', required=False, help='PVOutput API key.')
 @click.option('--system-id', 'system_id', envvar='PVOUTPUT_SYSTEM_ID', required=False, help='PVOutput System ID.')
 @click.option('--timezone', 'timezone', envvar='TZ', default='Australia/Sydney', required=True, help='PVOutput System ID.')

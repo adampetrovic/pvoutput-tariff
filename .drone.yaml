@@ -1,0 +1,13 @@
+kind: pipeline
+type: docker
+name: default
+steps:
+- name: docker
+  image: plugins/docker
+  settings:
+    registry: https://gitea.petrovic.network
+    repo: gitea.petrovic.network/adampetrovic/pvoutput-tariff
+    auto_tag: true
+    username: adampetrovic
+    password:
+      from_secret: GITEA_DOCKER
