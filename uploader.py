@@ -61,7 +61,7 @@ def send_price_to_pvoutput(api_key, system_id, price, now):
         'X-Pvoutput-SystemId': system_id,
         'Content-Type': 'application/x-www-form-urlencoded'
     }
-    data = f"v10={price}&d={date_str}&t={time_str}"
+    data = f"v12={price}&d={date_str}&t={time_str}"
     response = requests.post(url, headers=headers, data=data)
     return response
 
