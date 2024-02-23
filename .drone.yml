@@ -5,8 +5,9 @@ steps:
 - name: test
   image: python:3.10
   commands:
-    - pipenv install
-    - pipenv run python -m unittest
+    - pip install pipenv
+    - PIPENV_VENV_IN_PROJECT=1 pipenv install
+    - PIPENV_VENV_IN_PROJECT=1 pipenv run python -m unittest
 - name: docker
   image: plugins/docker
   settings:
