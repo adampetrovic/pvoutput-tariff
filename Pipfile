@@ -8,6 +8,7 @@ requests = "*"
 pyyaml = "*"
 pytz = "*"
 click = "*"
+holidays = "*"
 
 [dev-packages]
 

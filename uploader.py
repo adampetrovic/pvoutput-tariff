@@ -2,6 +2,7 @@ from datetime import datetime, time
 import yaml
 
 import click
+import holidays
 import requests
 import pytz
 import time as time_module
@@ -18,18 +19,25 @@ def is_time_in_period(current_time, start_str, end_str):
         return start_time <= current_time or current_time <= end_time
 
 
+def is_public_holiday(public_holidays, current_date):
+    if not public_holidays:
+        return False
+
+    country, state = public_holidays.get('country'), public_holidays.get('region')
+    return current_date in holidays.country_holidays(country, state)
+
+
 # Function to load tariff information from a YAML file
-def load_tariff_config(config_path):
+def load_config(config_path):
     with open(config_path, 'r', encoding='utf-8') as file:
         return yaml.safe_load(file)
 
 
-
-def get_current_tariff(tariff_config, current_datetime):
+def get_current_tariff(tariff_config, public_holidays, current_datetime):
     # set offpeak as a fallback if no other tariff matches
-    offpeak = tariff_config['tariffs'].pop('offpeak', None)
+    offpeak = tariff_config.pop('offpeak', None)
     # go through the remaining tariffs
-    for _, tariff in tariff_config['tariffs'].items():
+    for _, tariff in tariff_config.items():
         periods = tariff.get('times', [])
         # check if current time matches any tariff
         if any(is_time_in_period(current_datetime.time(), period['start'], period['end']) for period in periods):
@@ -38,14 +46,19 @@ def get_current_tariff(tariff_config, current_datetime):
             if 'start_date' not in tariff and 'end_date' not in tariff:
                 return tariff['price']
             else:
-                if tariff['start_date'] <= current_datetime.date() <= tariff['end_date']:
-                    return tariff['price']
+                weekdays_only = tariff.get('weekdays_only', False)
+                is_weekday = (current_datetime.weekday() < 5)
+                is_holiday = is_public_holiday(public_holidays, current_datetime.date())
+                if not is_holiday and (weekdays_only and is_weekday or not weekdays_only):
+                    # if we are in the range of the start and end date then we found our tariff
+                    if tariff['start_date'] <= current_datetime.date() <= tariff['end_date']:
+                        return tariff['price']
 
     return offpeak['price']
 
+
 def send_price_to_pvoutput(api_key, system_id, price, now):
     date_str = now.strftime('%Y%m%d')
-
     # pvoutput expects a data feed sent to an extended parameter every 5 minutes
     # e.g. 00, 05, 10, ..., 55
     minute = now.minute - now.minute % 5
@@ -70,9 +83,9 @@ def send_price_to_pvoutput(api_key, system_id, price, now):
 @click.option('--timezone', 'timezone', envvar='TZ', default='Australia/Sydney', required=True,
               help='PVOutput System ID.')
 def main(config_path, api_key, system_id, timezone):
-    tariff_config = load_tariff_config(config_path)
+    config = load_config(config_path)
     current_datetime = datetime.now(pytz.timezone(timezone))
-    current_tariff = get_current_tariff(tariff_config, current_datetime)
+    current_tariff = get_current_tariff(config.get('tariff'), config.get('public_holidays'), current_datetime)
     response = send_price_to_pvoutput(api_key, system_id, current_tariff, current_datetime)
     print(f"Sent tariff {current_tariff}c to PVOutput. Response: {response.status_code} - {response.text}")
 
