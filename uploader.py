@@ -57,7 +57,7 @@ def get_current_tariff(tariff_config, public_holidays, current_datetime):
     return offpeak['price']
 
 
-def send_price_to_pvoutput(api_key, system_id, price, now):
+def send_price_to_pvoutput(api_key, system_id, extended_param, price, now):
     date_str = now.strftime('%Y%m%d')
     # pvoutput expects a data feed sent to an extended parameter every 5 minutes
     # e.g. 00, 05, 10, ..., 55
@@ -70,7 +70,7 @@ def send_price_to_pvoutput(api_key, system_id, price, now):
         'X-Pvoutput-SystemId': system_id,
         'Content-Type': 'application/x-www-form-urlencoded'
     }
-    data = f"v12={price}&d={date_str}&t={time_str}"
+    data = f"{extended_param}={price}&d={date_str}&t={time_str}"
     response = requests.post(url, headers=headers, data=data)
     return response
 
@@ -86,7 +86,7 @@ def main(config_path, api_key, system_id, timezone):
     config = load_config(config_path)
     current_datetime = datetime.now(pytz.timezone(timezone))
     current_tariff = get_current_tariff(config.get('tariff'), config.get('public_holidays'), current_datetime)
-    response = send_price_to_pvoutput(api_key, system_id, current_tariff, current_datetime)
+    response = send_price_to_pvoutput(api_key, system_id, config['pvoutput']['extended_param'], current_tariff, current_datetime)
     print(f"Sent tariff {current_tariff}c to PVOutput. Response: {response.status_code} - {response.text}")
 
 
