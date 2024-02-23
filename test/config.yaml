@@ -1,4 +1,6 @@
 tariffs:
+  # precedence matters (code will check each tariff in order and stop as soon as it matches criteria)
+  # off-peak is a special tariff as it is the catch-all if nothing else matches
   peak_summer:
     price: 66.1815
     start_date: 2023-11-01
@@ -8,16 +10,11 @@ tariffs:
         end: '20:00'
   peak_winter:
     price: 66.1815
-    start_date: 2023-06-01
-    end_date: 2023-08-31
+    start_date: 2024-06-01
+    end_date: 2024-08-31
     times:
       - start: '17:00'
         end: '21:00'
-  shoulder:
-    price: 33.8415
-    times:
-      - start: '07:00'
-        end: '22:00'
   ev_offpeak:
     price: 8.39993
     times:
@@ -28,6 +25,11 @@ tariffs:
     times:
       - start: '11:00'
         end: '14:00'
+  shoulder:
+    price: 33.8415
+    times:
+      - start: '07:00'
+        end: '22:00'
   offpeak:
     price: 31.3005
     times: []
