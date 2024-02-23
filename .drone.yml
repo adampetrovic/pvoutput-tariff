@@ -2,6 +2,11 @@ kind: pipeline
 type: docker
 name: default
 steps:
+- name: test
+  image: python:3.10
+  commands:
+    - pipenv install
+    - pipenv run python -m unittest
 - name: docker
   image: plugins/docker
   settings:
