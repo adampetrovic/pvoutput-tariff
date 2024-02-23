@@ -85,7 +85,7 @@ def send_price_to_pvoutput(api_key, system_id, extended_param, price, now):
 def main(config_path, api_key, system_id, timezone):
     config = load_config(config_path)
     current_datetime = datetime.now(pytz.timezone(timezone))
-    current_tariff = get_current_tariff(config.get('tariff'), config.get('public_holidays'), current_datetime)
+    current_tariff = get_current_tariff(config.get('tariffs'), config.get('public_holidays'), current_datetime)
     response = send_price_to_pvoutput(api_key, system_id, config['pvoutput']['extended_param'], current_tariff, current_datetime)
     print(f"Sent tariff {current_tariff}c to PVOutput. Response: {response.status_code} - {response.text}")
 
