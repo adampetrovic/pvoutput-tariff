@@ -4,8 +4,8 @@ import yaml
 import click
 import holidays
 import requests
-import pytz
 import time as time_module
+import dateutil.tz
 
 
 # Helper function to check if current time is within a specified period
@@ -84,7 +84,7 @@ def send_price_to_pvoutput(api_key, system_id, extended_param, price, now):
               help='PVOutput System ID.')
 def main(config_path, api_key, system_id, timezone):
     config = load_config(config_path)
-    current_datetime = datetime.now(pytz.timezone(timezone))
+    current_datetime = datetime.now(dateutil.tz.gettz(timezone))
     current_tariff = get_current_tariff(config.get('tariffs'), config.get('public_holidays'), current_datetime)
     response = send_price_to_pvoutput(api_key, system_id, config['pvoutput']['extended_param'], current_tariff, current_datetime)
     print(f"Sent tariff {current_tariff}c to PVOutput. Response: {response.status_code} - {response.text}")
