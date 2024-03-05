@@ -7,7 +7,6 @@ import requests
 import time as time_module
 import dateutil.tz
 
-
 # Helper function to check if current time is within a specified period
 def is_time_in_period(current_time, start_str, end_str):
     start_time = time(*map(int, start_str.split(':')))
@@ -18,7 +17,6 @@ def is_time_in_period(current_time, start_str, end_str):
     else:  # Overnight period, e.g., 22:00-06:00
         return start_time <= current_time or current_time <= end_time
 
-
 def is_public_holiday(public_holidays, current_date):
     if not public_holidays:
         return False
@@ -26,12 +24,10 @@ def is_public_holiday(public_holidays, current_date):
     country, state = public_holidays.get('country'), public_holidays.get('region')
     return current_date in holidays.country_holidays(country, state)
 
-
 # Function to load tariff information from a YAML file
 def load_config(config_path):
     with open(config_path, 'r', encoding='utf-8') as file:
         return yaml.safe_load(file)
-
 
 def get_current_tariff(tariff_config, public_holidays, current_datetime):
     # set offpeak as a fallback if no other tariff matches
@@ -56,7 +52,6 @@ def get_current_tariff(tariff_config, public_holidays, current_datetime):
 
     return offpeak['price']
 
-
 def send_price_to_pvoutput(api_key, system_id, extended_param, price, now):
     date_str = now.strftime('%Y%m%d')
     # pvoutput expects a data feed sent to an extended parameter every 5 minutes
@@ -80,15 +75,13 @@ def send_price_to_pvoutput(api_key, system_id, extended_param, price, now):
 @click.option('--config', 'config_path', default='/config/config.yaml', help='Path to the configuration YAML file.')
 @click.option('--api-key', 'api_key', envvar='PVOUTPUT_API_KEY', required=False, help='PVOutput API key.')
 @click.option('--system-id', 'system_id', envvar='PVOUTPUT_SYSTEM_ID', required=False, help='PVOutput System ID.')
-@click.option('--timezone', 'timezone', envvar='TZ', default='Australia/Sydney', required=True,
-              help='PVOutput System ID.')
+@click.option('--timezone', 'timezone', envvar='TZ', default='Australia/Sydney', required=True, help='PVOutput System ID.')
 def main(config_path, api_key, system_id, timezone):
     config = load_config(config_path)
     current_datetime = datetime.now(dateutil.tz.gettz(timezone))
     current_tariff = get_current_tariff(config.get('tariffs'), config.get('public_holidays'), current_datetime)
     response = send_price_to_pvoutput(api_key, system_id, config['pvoutput']['extended_param'], current_tariff, current_datetime)
     print(f"Sent tariff {current_tariff}c to PVOutput. Response: {response.status_code} - {response.text}")
-
 
 if __name__ == '__main__':
     main()
