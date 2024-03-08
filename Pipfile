@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 requests = "*"
 pyyaml = "*"
-pytz = "*"
 click = "*"
 holidays = "*"
 
