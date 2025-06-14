@@ -67,7 +67,7 @@ class MainCLITests(unittest.TestCase):
             "--system-id", "test_id"
         ])
         self.assertNotEqual(result.exit_code, 0)
-        self.assertIn("Missing required config key: tariffs", result.output)
+        self.assertIn("Missing required configuration key: tariffs", result.output)
 
         # Test missing pvoutput
         bad_config = {"tariffs": {"offpeak": {"price": 30, "times": []}}}
@@ -81,7 +81,7 @@ class MainCLITests(unittest.TestCase):
             "--system-id", "test_id"
         ])
         self.assertNotEqual(result.exit_code, 0)
-        self.assertIn("Missing required config key: pvoutput", result.output)
+        self.assertIn("Missing required configuration key: pvoutput", result.output)
 
         # Test missing extended_param
         bad_config = {
@@ -98,7 +98,7 @@ class MainCLITests(unittest.TestCase):
             "--system-id", "test_id"
         ])
         self.assertNotEqual(result.exit_code, 0)
-        self.assertIn("Missing 'extended_param' in pvoutput config", result.output)
+        self.assertIn("pvoutput configuration must include 'extended_param'", result.output)
 
     def test_missing_tariffs_in_config(self):
         """Test error when tariffs key exists but is None/empty"""
@@ -116,7 +116,7 @@ class MainCLITests(unittest.TestCase):
             "--system-id", "test_id"
         ])
         self.assertNotEqual(result.exit_code, 0)
-        self.assertIn("Missing 'tariffs' in config", result.output)
+        self.assertIn("tariffs configuration must be a dictionary", result.output)
 
     @patch("uploader.send_price_to_pvoutput")
     def test_successful_execution(self, mock_send):
