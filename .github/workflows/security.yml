@@ -39,15 +39,13 @@ jobs:
           python -m pip install --upgrade pip pipenv
           pipenv install --dev
 
-      - name: Run safety check
+      - name: Run safety scan
         run: |
-          pipenv run safety check --json --output safety-report.json --continue-on-error
-        continue-on-error: true
+          pipenv run safety scan --output json --output-file safety-report.json || true
 
       - name: Run pip-audit
         run: |
-          pipenv run pip-audit --format=json --output=pip-audit-report.json
-        continue-on-error: true
+          pipenv run pip-audit --format=json --output=pip-audit-report.json || true
 
       - name: Upload safety results
         if: always()

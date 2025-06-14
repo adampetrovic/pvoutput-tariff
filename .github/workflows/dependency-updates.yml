@@ -300,7 +300,7 @@ jobs:
       - name: Run security audit
         run: |
           echo "Running post-update security audit..."
-          pipenv run safety check --continue-on-error
+          pipenv run safety scan || true
           pipenv run bandit -r uploader.py -f txt
 
   create-update-summary:

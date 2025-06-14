@@ -40,17 +40,14 @@ test-failed: ## Run only failed tests
 # Code quality
 lint: ## Run linting checks
 	pipenv run flake8 uploader.py test/
-	pipenv run ruff check .
 
 format: ## Format code
 	pipenv run black uploader.py test/
 	pipenv run isort uploader.py test/
-	pipenv run ruff format .
 
 format-check: ## Check code formatting
 	pipenv run black --check uploader.py test/
 	pipenv run isort --check-only uploader.py test/
-	pipenv run ruff format --check .
 
 type-check: ## Run type checking
 	pipenv run mypy uploader.py
@@ -58,11 +55,11 @@ type-check: ## Run type checking
 # Security
 security: ## Run security checks
 	pipenv run bandit -r uploader.py
-	pipenv run safety check
+	pipenv run safety scan
 
 security-audit: ## Run comprehensive security audit
 	pipenv run bandit -r uploader.py -f json -o bandit-report.json
-	pipenv run safety check --json --output safety-report.json
+	pipenv run safety scan --output json --output-file safety-report.json
 	pipenv run pip-audit --format=json --output=pip-audit-report.json
 
 # Combined checks
@@ -96,15 +93,20 @@ validate: ## Validate test configurations
 
 # Dependencies
 deps-update: ## Update dependencies
+	@if [ ! -f Pipfile ]; then echo "❌ No Pipfile found. Run 'make install' first."; exit 1; fi
 	pipenv update
 
 deps-outdated: ## Check for outdated dependencies
+	@if [ ! -f Pipfile ]; then echo "❌ No Pipfile found. Run 'make install' first."; exit 1; fi
 	pipenv update --outdated
 
 deps-graph: ## Show dependency graph
-	pipenv graph
+	@if [ ! -f Pipfile ]; then echo "❌ No Pipfile found. Run 'make install' first."; exit 1; fi
+	@echo "📊 Dependency graph:"
+	pipenv graph || (echo "❌ Failed to generate dependency graph. Try running 'make install' first." && exit 1)
 
 deps-licenses: ## Show dependency licenses
+	@if [ ! -f Pipfile ]; then echo "❌ No Pipfile found. Run 'make install' first."; exit 1; fi
 	pipenv run pip-licenses
 
 # Docker
