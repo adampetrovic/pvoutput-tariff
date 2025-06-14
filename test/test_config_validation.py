@@ -10,19 +10,10 @@ class ConfigValidationTests(unittest.TestCase):
         self.valid_config = {
             "pvoutput": {"extended_param": "v12"},
             "tariffs": {
-                "peak": {
-                    "price": 66.18,
-                    "times": [{"start": "14:00", "end": "20:00"}]
-                },
-                "offpeak": {
-                    "price": 31.30,
-                    "times": []
-                }
+                "peak": {"price": 66.18, "times": [{"start": "14:00", "end": "20:00"}]},
+                "offpeak": {"price": 31.30, "times": []},
             },
-            "public_holidays": {
-                "country": "AU",
-                "region": "NSW"
-            }
+            "public_holidays": {"country": "AU", "region": "NSW"},
         }
 
     def test_valid_config(self):
@@ -63,8 +54,7 @@ class ConfigValidationTests(unittest.TestCase):
         with self.assertRaises(ValueError) as cm:
             validate_config(config)
         self.assertIn(
-            "pvoutput configuration must include 'extended_param'",
-            str(cm.exception)
+            "pvoutput configuration must include 'extended_param'", str(cm.exception)
         )
 
         # Invalid extended_param type
@@ -78,8 +68,7 @@ class ConfigValidationTests(unittest.TestCase):
         with self.assertRaises(ValueError) as cm:
             validate_config(config)
         self.assertIn(
-            "extended_param must be in format 'v1' to 'v12'",
-            str(cm.exception)
+            "extended_param must be in format 'v1' to 'v12'", str(cm.exception)
         )
 
         # Extended param out of range
@@ -157,7 +146,7 @@ class ConfigValidationTests(unittest.TestCase):
         config["tariffs"]["peak"] = {
             "price": 50.0,
             "times": [{"start": "14:00", "end": "20:00"}],
-            "start_date": date(2024, 1, 1)
+            "start_date": date(2024, 1, 1),
         }
         with self.assertRaises(ValueError) as cm:
             validate_config(config)
@@ -168,7 +157,7 @@ class ConfigValidationTests(unittest.TestCase):
             "price": 50.0,
             "times": [{"start": "14:00", "end": "20:00"}],
             "start_date": "invalid-date",
-            "end_date": date(2024, 3, 31)
+            "end_date": date(2024, 3, 31),
         }
         with self.assertRaises(ValueError) as cm:
             validate_config(config)
@@ -179,7 +168,7 @@ class ConfigValidationTests(unittest.TestCase):
             "price": 50.0,
             "times": [{"start": "14:00", "end": "20:00"}],
             "start_date": date(2024, 3, 31),
-            "end_date": date(2024, 1, 1)
+            "end_date": date(2024, 1, 1),
         }
         with self.assertRaises(ValueError) as cm:
             validate_config(config)
@@ -189,7 +178,7 @@ class ConfigValidationTests(unittest.TestCase):
         config["tariffs"]["peak"] = {
             "price": 50.0,
             "times": [{"start": "14:00", "end": "20:00"}],
-            "weekdays_only": "yes"
+            "weekdays_only": "yes",
         }
         with self.assertRaises(ValueError) as cm:
             validate_config(config)
@@ -203,7 +192,7 @@ class ConfigValidationTests(unittest.TestCase):
             "price": 50.0,
             "times": [{"start": "14:00", "end": "20:00"}],
             "start_date": 123,
-            "end_date": date(2024, 3, 31)
+            "end_date": date(2024, 3, 31),
         }
         with self.assertRaises(ValueError) as cm:
             validate_config(config)
@@ -214,7 +203,7 @@ class ConfigValidationTests(unittest.TestCase):
             "price": 50.0,
             "times": [{"start": "14:00", "end": "20:00"}],
             "start_date": date(2024, 1, 1),
-            "end_date": 123
+            "end_date": 123,
         }
         with self.assertRaises(ValueError) as cm:
             validate_config(config)
@@ -225,7 +214,7 @@ class ConfigValidationTests(unittest.TestCase):
             "price": 50.0,
             "times": [{"start": "14:00", "end": "20:00"}],
             "start_date": date(2024, 1, 1),
-            "end_date": "bad-date-format"
+            "end_date": "bad-date-format",
         }
         with self.assertRaises(ValueError) as cm:
             validate_config(config)
@@ -293,8 +282,7 @@ class ConfigValidationTests(unittest.TestCase):
         with self.assertRaises(ValueError) as cm:
             validate_config(config)
         self.assertIn(
-            "public_holidays configuration must be a dictionary",
-            str(cm.exception)
+            "public_holidays configuration must be a dictionary", str(cm.exception)
         )
 
         # Missing country
@@ -326,9 +314,7 @@ class ConfigValidationTests(unittest.TestCase):
         # Configuration without public holidays
         config = {
             "pvoutput": {"extended_param": "v1"},
-            "tariffs": {
-                "offpeak": {"price": 0.0, "times": []}  # Zero price is valid
-            }
+            "tariffs": {"offpeak": {"price": 0.0, "times": []}},  # Zero price is valid
         }
         validate_config(config)  # Should not raise
 
@@ -338,10 +324,10 @@ class ConfigValidationTests(unittest.TestCase):
             "tariffs": {
                 "overnight": {
                     "price": 15.0,
-                    "times": [{"start": "22:00", "end": "06:00"}]
+                    "times": [{"start": "22:00", "end": "06:00"}],
                 },
-                "offpeak": {"price": 30.0, "times": []}
-            }
+                "offpeak": {"price": 30.0, "times": []},
+            },
         }
         validate_config(config)  # Should not raise
 

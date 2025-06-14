@@ -18,10 +18,10 @@ class MainCLITests(unittest.TestCase):
             "tariffs": {
                 "peak": {
                     "price": 66.1815,
-                    "times": [{"start": "14:00", "end": "20:00"}]
+                    "times": [{"start": "14:00", "end": "20:00"}],
                 },
-                "offpeak": {"price": 31.3005, "times": []}
-            }
+                "offpeak": {"price": 31.3005, "times": []},
+            },
         }
 
     def test_missing_api_credentials(self):
@@ -36,18 +36,16 @@ class MainCLITests(unittest.TestCase):
         self.assertIn("Missing required API credentials", result.output)
 
         # Test missing system ID
-        result = self.runner.invoke(main, [
-            "--config", config_path,
-            "--api-key", "test_key"
-        ])
+        result = self.runner.invoke(
+            main, ["--config", config_path, "--api-key", "test_key"]
+        )
         self.assertNotEqual(result.exit_code, 0)
         self.assertIn("Missing required API credentials", result.output)
 
         # Test missing API key
-        result = self.runner.invoke(main, [
-            "--config", config_path,
-            "--system-id", "test_id"
-        ])
+        result = self.runner.invoke(
+            main, ["--config", config_path, "--system-id", "test_id"]
+        )
         self.assertNotEqual(result.exit_code, 0)
         self.assertIn("Missing required API credentials", result.output)
 
@@ -59,11 +57,17 @@ class MainCLITests(unittest.TestCase):
             yaml.dump(bad_config, f)
             config_path = f.name
 
-        result = self.runner.invoke(main, [
-            "--config", config_path,
-            "--api-key", "test_key",
-            "--system-id", "test_id"
-        ])
+        result = self.runner.invoke(
+            main,
+            [
+                "--config",
+                config_path,
+                "--api-key",
+                "test_key",
+                "--system-id",
+                "test_id",
+            ],
+        )
         self.assertNotEqual(result.exit_code, 0)
         self.assertIn("Missing required configuration key: tariffs", result.output)
 
@@ -73,49 +77,66 @@ class MainCLITests(unittest.TestCase):
             yaml.dump(bad_config, f)
             config_path = f.name
 
-        result = self.runner.invoke(main, [
-            "--config", config_path,
-            "--api-key", "test_key",
-            "--system-id", "test_id"
-        ])
+        result = self.runner.invoke(
+            main,
+            [
+                "--config",
+                config_path,
+                "--api-key",
+                "test_key",
+                "--system-id",
+                "test_id",
+            ],
+        )
         self.assertNotEqual(result.exit_code, 0)
         self.assertIn("Missing required configuration key: pvoutput", result.output)
 
         # Test missing extended_param
         bad_config = {
             "tariffs": {"offpeak": {"price": 30, "times": []}},
-            "pvoutput": {}
+            "pvoutput": {},
         }
         with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             yaml.dump(bad_config, f)
             config_path = f.name
 
-        result = self.runner.invoke(main, [
-            "--config", config_path,
-            "--api-key", "test_key",
-            "--system-id", "test_id"
-        ])
+        result = self.runner.invoke(
+            main,
+            [
+                "--config",
+                config_path,
+                "--api-key",
+                "test_key",
+                "--system-id",
+                "test_id",
+            ],
+        )
         self.assertNotEqual(result.exit_code, 0)
         self.assertIn(
-            "pvoutput configuration must include 'extended_param'",
-            result.output
+            "pvoutput configuration must include 'extended_param'", result.output
         )
 
     def test_missing_tariffs_in_config(self):
         """Test error when tariffs key exists but is None/empty"""
         bad_config = {
             "tariffs": None,  # Explicitly None
-            "pvoutput": {"extended_param": "v12"}
+            "pvoutput": {"extended_param": "v12"},
         }
         with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
             yaml.dump(bad_config, f)
             config_path = f.name
 
-        result = self.runner.invoke(main, [
-            "--config", config_path,
-            "--api-key", "test_key",
-            "--system-id", "test_id"
-        ])
+        result = self.runner.invoke(
+            main,
+            [
+                "--config",
+                config_path,
+                "--api-key",
+                "test_key",
+                "--system-id",
+                "test_id",
+            ],
+        )
         self.assertNotEqual(result.exit_code, 0)
         self.assertIn("tariffs configuration must be a dictionary", result.output)
 
@@ -130,12 +151,19 @@ class MainCLITests(unittest.TestCase):
             yaml.dump(self.test_config, f)
             config_path = f.name
 
-        result = self.runner.invoke(main, [
-            "--config", config_path,
-            "--api-key", "test_key",
-            "--system-id", "test_id",
-            "--timezone", "Australia/Sydney"
-        ])
+        result = self.runner.invoke(
+            main,
+            [
+                "--config",
+                config_path,
+                "--api-key",
+                "test_key",
+                "--system-id",
+                "test_id",
+                "--timezone",
+                "Australia/Sydney",
+            ],
+        )
 
         self.assertEqual(result.exit_code, 0)
         mock_send.assert_called_once()

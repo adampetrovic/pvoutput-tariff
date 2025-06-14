@@ -8,10 +8,7 @@ class EdgeCaseTests(unittest.TestCase):
     def test_get_current_tariff_no_offpeak(self):
         """Test behavior when no offpeak tariff is defined"""
         tariff_config = {
-            "peak": {
-                "price": 50.0,
-                "times": [{"start": "14:00", "end": "20:00"}]
-            }
+            "peak": {"price": 50.0, "times": [{"start": "14:00", "end": "20:00"}]}
         }
 
         # Time outside peak should return 0.0 when no offpeak is defined
@@ -22,14 +19,8 @@ class EdgeCaseTests(unittest.TestCase):
     def test_get_current_tariff_empty_times(self):
         """Test tariff with empty times list"""
         tariff_config = {
-            "shoulder": {
-                "price": 40.0,
-                "times": []  # Empty times
-            },
-            "offpeak": {
-                "price": 30.0,
-                "times": []
-            }
+            "shoulder": {"price": 40.0, "times": []},  # Empty times
+            "offpeak": {"price": 30.0, "times": []},
         }
 
         test_datetime = datetime(2024, 6, 15, 10, 0, 0)
@@ -56,12 +47,9 @@ class EdgeCaseTests(unittest.TestCase):
                 "start_date": date(2024, 1, 1),
                 "end_date": date(2024, 3, 31),
                 "weekdays_only": False,
-                "times": [{"start": "14:00", "end": "20:00"}]
+                "times": [{"start": "14:00", "end": "20:00"}],
             },
-            "offpeak": {
-                "price": 30.0,
-                "times": []
-            }
+            "offpeak": {"price": 30.0, "times": []},
         }
 
         # Test on exact start date
@@ -89,12 +77,9 @@ class EdgeCaseTests(unittest.TestCase):
                 "start_date": date(2024, 1, 1),
                 "end_date": date(2024, 12, 31),
                 "weekdays_only": True,
-                "times": [{"start": "14:00", "end": "20:00"}]
+                "times": [{"start": "14:00", "end": "20:00"}],
             },
-            "offpeak": {
-                "price": 30.0,
-                "times": []
-            }
+            "offpeak": {"price": 30.0, "times": []},
         }
 
         public_holidays = {"country": "AU", "region": "NSW"}
@@ -113,16 +98,10 @@ class EdgeCaseTests(unittest.TestCase):
         tariff_config = {
             "super_offpeak": {
                 "price": 10.0,
-                "times": [{"start": "11:00", "end": "14:00"}]
+                "times": [{"start": "11:00", "end": "14:00"}],
             },
-            "shoulder": {
-                "price": 40.0,
-                "times": [{"start": "07:00", "end": "22:00"}]
-            },
-            "offpeak": {
-                "price": 30.0,
-                "times": []
-            }
+            "shoulder": {"price": 40.0, "times": [{"start": "07:00", "end": "22:00"}]},
+            "offpeak": {"price": 30.0, "times": []},
         }
 
         # Test time that overlaps - should get first matching tariff

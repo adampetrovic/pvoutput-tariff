@@ -45,10 +45,9 @@ class ErrorHandlingTests(unittest.TestCase):
         """Test timeout handling in API call"""
         mock_post.side_effect = requests.exceptions.Timeout()
         from datetime import datetime
+
         with self.assertRaises(requests.exceptions.Timeout):
-            send_price_to_pvoutput(
-                "test_key", "test_id", "v12", 25.0, datetime.now()
-            )
+            send_price_to_pvoutput("test_key", "test_id", "v12", 25.0, datetime.now())
 
     @patch("requests.post")
     def test_send_price_http_error(self, mock_post):
@@ -57,20 +56,18 @@ class ErrorHandlingTests(unittest.TestCase):
         mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError()
         mock_post.return_value = mock_response
         from datetime import datetime
+
         with self.assertRaises(requests.exceptions.HTTPError):
-            send_price_to_pvoutput(
-                "test_key", "test_id", "v12", 25.0, datetime.now()
-            )
+            send_price_to_pvoutput("test_key", "test_id", "v12", 25.0, datetime.now())
 
     @patch("requests.post")
     def test_send_price_request_exception(self, mock_post):
         """Test general request exception handling"""
         mock_post.side_effect = requests.exceptions.RequestException()
         from datetime import datetime
+
         with self.assertRaises(requests.exceptions.RequestException):
-            send_price_to_pvoutput(
-                "test_key", "test_id", "v12", 25.0, datetime.now()
-            )
+            send_price_to_pvoutput("test_key", "test_id", "v12", 25.0, datetime.now())
 
     @patch("requests.post")
     def test_send_price_success(self, mock_post):
@@ -80,6 +77,7 @@ class ErrorHandlingTests(unittest.TestCase):
         mock_response.raise_for_status.return_value = None
         mock_post.return_value = mock_response
         from datetime import datetime
+
         result = send_price_to_pvoutput(
             "test_key", "test_id", "v12", 25.0, datetime.now()
         )
