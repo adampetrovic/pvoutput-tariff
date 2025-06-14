@@ -21,7 +21,7 @@ This project follows the [Contributor Covenant Code of Conduct](https://www.cont
 
 ### Prerequisites
 
-- Python 3.10 or higher
+- Python 3.10
 - Git
 - pipenv (for dependency management)
 - Docker (optional, for container testing)

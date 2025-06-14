@@ -5,7 +5,7 @@
 [![Security Scan](https://github.com/adampetrovic/pvoutput-tariff/actions/workflows/security.yml/badge.svg)](https://github.com/adampetrovic/pvoutput-tariff/actions/workflows/security.yml)
 [![codecov](https://codecov.io/gh/adampetrovic/pvoutput-tariff/branch/main/graph/badge.svg)](https://codecov.io/gh/adampetrovic/pvoutput-tariff)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/)
 
 A Python-based utility that automatically calculates and uploads electricity tariff prices to [PVOutput](https://pvoutput.org/) based on time-of-use rates, seasonal variations, and public holidays.
 
@@ -72,7 +72,7 @@ pipenv run python uploader.py \
 
 ### Prerequisites
 
-- Python 3.10 or higher
+- Python 3.10
 - [pipenv](https://pipenv.pypa.io/en/latest/) for dependency management
 - [Docker](https://docker.com/) (optional, for containerized deployment)
 
@@ -445,6 +445,10 @@ We follow [Semantic Versioning](https://semver.org/):
 - **MAJOR** (`v2.0.0`): Breaking changes
 - **MINOR** (`v1.1.0`): New features, backwards compatible
 - **PATCH** (`v1.0.1`): Bug fixes, backwards compatible
+
+### Python Version
+
+This project is built and tested with **Python 3.10** for stability and compatibility. While it may work with other Python versions, we recommend using Python 3.10 for development and production.
 
 ## 🤝 Contributing
 

@@ -23,7 +23,7 @@ permissions:
   issues: write
 
 env:
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.10"
   PIPENV_VENV_IN_PROJECT: 1
 
 jobs:
@@ -211,7 +211,7 @@ jobs:
           
           # Check for latest Python version (this is simplified)
           # In practice, you'd want to check against official Python releases
-          latest_tag="3.12"
+          latest_tag="3.10"
           echo "latest-tag=$latest_tag" >> $GITHUB_OUTPUT
           
           if [ "$current_tag" != "$latest_tag" ]; then

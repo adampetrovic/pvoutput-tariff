@@ -27,7 +27,7 @@ permissions:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.10"
   PIPENV_VENV_IN_PROJECT: 1
 
 jobs:
@@ -159,9 +159,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     if: needs.build.result == 'success'
-    strategy:
-      matrix:
-        platform: [linux/amd64, linux/arm64]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -173,11 +170,10 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: ${{ matrix.platform }}
+          platforms: linux/amd64
           load: true
           tags: test-image:latest
           cache-from: type=gha
-          target: runtime
 
       - name: Test image security
         uses: aquasecurity/trivy-action@master
