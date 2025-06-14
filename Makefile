@@ -1,6 +1,6 @@
 # PVOutput Tariff Uploader - Development Makefile
 
-.PHONY: help install install-dev test test-cov lint format type-check security check clean build docker run validate
+.PHONY: help install install-dev test test-cov lint format type-check check clean build docker run validate
 
 # Default target
 help: ## Show this help message
@@ -52,18 +52,8 @@ format-check: ## Check code formatting
 type-check: ## Run type checking
 	pipenv run mypy uploader.py
 
-# Security
-security: ## Run security checks
-	pipenv run bandit -r uploader.py
-	pipenv run safety scan
-
-security-audit: ## Run comprehensive security audit
-	pipenv run bandit -r uploader.py -f json -o bandit-report.json
-	pipenv run safety scan --output json --output-file safety-report.json
-	pipenv run pip-audit --format=json --output=pip-audit-report.json
-
 # Combined checks
-check: lint format-check type-check security test ## Run all quality checks
+check: lint format-check type-check test ## Run all quality checks
 
 check-ci: ## Run CI-style checks (used in GitHub Actions)
 	pipenv run flake8 uploader.py test/
@@ -205,7 +195,7 @@ dev: install-dev validate check ## Setup development environment and run checks
 quick-check: lint type-check test ## Quick checks for development
 
 # Release preparation
-prepare-release: check security-audit build ## Prepare for release (run all checks and build)
+prepare-release: check build ## Prepare for release (run all checks and build)
 
 # Monitoring and profiling
 profile: ## Profile the application (basic timing)

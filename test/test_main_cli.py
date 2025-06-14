@@ -1,8 +1,8 @@
 import tempfile
 import unittest
 from unittest.mock import Mock, patch
-import yaml
 
+import yaml
 from click.testing import CliRunner
 
 from uploader import main

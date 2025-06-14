@@ -2,7 +2,6 @@
 
 [![CI/CD Pipeline](https://github.com/adampetrovic/pvoutput-tariff/actions/workflows/ci.yml/badge.svg)](https://github.com/adampetrovic/pvoutput-tariff/actions/workflows/ci.yml)
 [![Docker Build](https://github.com/adampetrovic/pvoutput-tariff/actions/workflows/docker.yml/badge.svg)](https://github.com/adampetrovic/pvoutput-tariff/actions/workflows/docker.yml)
-[![Security Scan](https://github.com/adampetrovic/pvoutput-tariff/actions/workflows/security.yml/badge.svg)](https://github.com/adampetrovic/pvoutput-tariff/actions/workflows/security.yml)
 [![codecov](https://codecov.io/gh/adampetrovic/pvoutput-tariff/branch/main/graph/badge.svg)](https://codecov.io/gh/adampetrovic/pvoutput-tariff)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/)
@@ -16,7 +15,6 @@ A Python-based utility that automatically calculates and uploads electricity tar
 - 🏖️ **Holiday Support**: Automatic public holiday detection with regional support
 - 🔄 **Automated Uploads**: Regular uploads to PVOutput extended parameters
 - 🐳 **Docker Support**: Easy deployment with multi-architecture containers
-- 🔒 **Security First**: Comprehensive security scanning and validation
 - ⚡ **High Performance**: Efficient execution with minimal resource usage
 
 ## 📋 Table of Contents
@@ -29,7 +27,6 @@ A Python-based utility that automatically calculates and uploads electricity tar
 - [Docker Usage](#-docker-usage)
 - [Release Process](#-release-process)
 - [Contributing](#-contributing)
-- [Security](#-security)
 - [License](#-license)
 
 ## 🚀 Quick Start
@@ -256,7 +253,6 @@ pipenv run flake8 uploader.py test/          # Linting
 pipenv run black uploader.py test/           # Formatting  
 pipenv run isort uploader.py test/           # Import sorting
 pipenv run mypy uploader.py                  # Type checking
-pipenv run bandit -r uploader.py             # Security scanning
 ```
 
 #### Testing
@@ -278,20 +274,17 @@ pipenv run pytest -v
 pipenv run pytest --lf
 ```
 
-#### Security and Dependencies
+#### Dependencies
 
 ```bash
-# Check for security vulnerabilities
-pipenv run safety check
-
-# Audit dependencies
-pipenv run pip-audit
-
-# Check licenses
-pipenv run pip-licenses
-
 # Update dependencies
 pipenv update
+
+# Check for outdated dependencies
+pipenv update --outdated
+
+# Show dependency graph
+pipenv graph
 ```
 
 ### Project Structure
@@ -418,7 +411,6 @@ git push origin v1.2.3
 This triggers the release workflow which:
 - ✅ Validates the release
 - 🏗️ Builds Python packages and Docker images
-- 🔒 Runs security scans
 - 📝 Generates release notes
 - 🚀 Publishes to GitHub Releases and container registry
 
@@ -475,27 +467,6 @@ We use [Conventional Commits](https://www.conventionalcommits.org/):
 - `refactor:` Code refactoring
 - `chore:` Maintenance tasks
 
-## 🔒 Security
-
-### Security Features
-
-- 🔍 **Automated Security Scanning**: CodeQL, Bandit, Semgrep, Trivy
-- 🔐 **Container Signing**: Images signed with cosign
-- 📋 **SBOM Generation**: Software Bill of Materials included
-- 🛡️ **Dependency Scanning**: Regular vulnerability checks
-- 🔑 **Secret Detection**: Prevents accidental secret commits
-
-### Reporting Security Issues
-
-Please report security vulnerabilities to [security@example.com](mailto:security@example.com) or use GitHub's security advisory feature.
-
-### Security Best Practices
-
-- Always use the latest version
-- Verify container image signatures
-- Keep dependencies updated
-- Use environment variables for secrets
-- Run containers as non-root user
 
 ## 📄 License
 
