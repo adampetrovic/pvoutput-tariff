@@ -16,10 +16,10 @@ class TimePeriodTests(unittest.TestCase):
         # Test time during overnight period
         current_time = time(23, 30)  # 11:30 PM
         self.assertTrue(is_time_in_period(current_time, "22:00", "06:00"))
-        
+
         current_time = time(2, 30)  # 2:30 AM
         self.assertTrue(is_time_in_period(current_time, "22:00", "06:00"))
-        
+
         # Test time outside overnight period
         current_time = time(12, 30)  # 12:30 PM
         self.assertFalse(is_time_in_period(current_time, "22:00", "06:00"))
@@ -28,14 +28,14 @@ class TimePeriodTests(unittest.TestCase):
         """Test exact boundary times"""
         current_time = time(14, 0)  # Exact start time
         self.assertTrue(is_time_in_period(current_time, "14:00", "16:00"))
-        
+
         current_time = time(16, 0)  # Exact end time
         self.assertTrue(is_time_in_period(current_time, "14:00", "16:00"))
-        
+
         # Test overnight boundaries
         current_time = time(22, 0)  # Exact start time
         self.assertTrue(is_time_in_period(current_time, "22:00", "06:00"))
-        
+
         current_time = time(6, 0)  # Exact end time
         self.assertTrue(is_time_in_period(current_time, "22:00", "06:00"))
 

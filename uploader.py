@@ -62,10 +62,8 @@ def load_config(config_path: str) -> Dict[str, Any]:
             config = yaml.safe_load(file)
             if not config:
                 raise ValueError("Configuration file is empty")
-            
             # Validate configuration structure
             validate_config(config)
-            
             logging.info(f"Successfully loaded config from {config_path}")
             return dict(config)
     except FileNotFoundError:
@@ -107,7 +105,8 @@ def get_current_tariff(
                 if not is_holiday and (
                     (weekdays_only and is_weekday) or not weekdays_only
                 ):
-                    # if we are in the range of the start and end date then we found our tariff
+                    # if we are in the range of the start and end date
+                    # then we found our tariff
                     if (
                         tariff["start_date"]
                         <= current_datetime.date()

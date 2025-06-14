@@ -3,7 +3,6 @@ import unittest
 from unittest.mock import Mock, patch
 import yaml
 
-import click
 from click.testing import CliRunner
 
 from uploader import main
@@ -12,7 +11,6 @@ from uploader import main
 class MainCLITests(unittest.TestCase):
     def setUp(self):
         self.runner = CliRunner()
-        
         # Create a test config
         self.test_config = {
             "pvoutput": {"extended_param": "v12"},
@@ -98,7 +96,10 @@ class MainCLITests(unittest.TestCase):
             "--system-id", "test_id"
         ])
         self.assertNotEqual(result.exit_code, 0)
-        self.assertIn("pvoutput configuration must include 'extended_param'", result.output)
+        self.assertIn(
+            "pvoutput configuration must include 'extended_param'",
+            result.output
+        )
 
     def test_missing_tariffs_in_config(self):
         """Test error when tariffs key exists but is None/empty"""

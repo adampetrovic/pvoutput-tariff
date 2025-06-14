@@ -52,7 +52,6 @@ class ConfigValidationTests(unittest.TestCase):
     def test_pvoutput_validation(self):
         """Test pvoutput section validation."""
         config = self.valid_config.copy()
-        
         # Invalid pvoutput type
         config["pvoutput"] = "not a dict"
         with self.assertRaises(ValueError) as cm:
@@ -63,7 +62,10 @@ class ConfigValidationTests(unittest.TestCase):
         config["pvoutput"] = {}
         with self.assertRaises(ValueError) as cm:
             validate_config(config)
-        self.assertIn("pvoutput configuration must include 'extended_param'", str(cm.exception))
+        self.assertIn(
+            "pvoutput configuration must include 'extended_param'",
+            str(cm.exception)
+        )
 
         # Invalid extended_param type
         config["pvoutput"] = {"extended_param": 12}
@@ -75,7 +77,10 @@ class ConfigValidationTests(unittest.TestCase):
         config["pvoutput"] = {"extended_param": "invalid"}
         with self.assertRaises(ValueError) as cm:
             validate_config(config)
-        self.assertIn("extended_param must be in format 'v1' to 'v12'", str(cm.exception))
+        self.assertIn(
+            "extended_param must be in format 'v1' to 'v12'",
+            str(cm.exception)
+        )
 
         # Extended param out of range
         config["pvoutput"] = {"extended_param": "v13"}
@@ -86,7 +91,6 @@ class ConfigValidationTests(unittest.TestCase):
     def test_tariffs_validation(self):
         """Test tariffs section validation."""
         config = self.valid_config.copy()
-        
         # Invalid tariffs type
         config["tariffs"] = "not a dict"
         with self.assertRaises(ValueError) as cm:
@@ -110,7 +114,6 @@ class ConfigValidationTests(unittest.TestCase):
     def test_single_tariff_validation(self):
         """Test individual tariff validation."""
         config = self.valid_config.copy()
-        
         # Invalid tariff type
         config["tariffs"]["peak"] = "not a dict"
         with self.assertRaises(ValueError) as cm:
@@ -150,7 +153,6 @@ class ConfigValidationTests(unittest.TestCase):
     def test_seasonal_tariff_validation(self):
         """Test seasonal tariff date validation."""
         config = self.valid_config.copy()
-        
         # Only start_date without end_date
         config["tariffs"]["peak"] = {
             "price": 50.0,
@@ -196,7 +198,6 @@ class ConfigValidationTests(unittest.TestCase):
     def test_invalid_date_types(self):
         """Test various invalid date types."""
         config = self.valid_config.copy()
-        
         # Invalid start_date type (not string or date)
         config["tariffs"]["peak"] = {
             "price": 50.0,
@@ -208,7 +209,7 @@ class ConfigValidationTests(unittest.TestCase):
             validate_config(config)
         self.assertIn("start_date must be a date or date string", str(cm.exception))
 
-        # Invalid end_date type  
+        # Invalid end_date type
         config["tariffs"]["peak"] = {
             "price": 50.0,
             "times": [{"start": "14:00", "end": "20:00"}],
@@ -233,7 +234,6 @@ class ConfigValidationTests(unittest.TestCase):
     def test_time_period_validation(self):
         """Test time period validation."""
         config = self.valid_config.copy()
-        
         # Invalid time period type
         config["tariffs"]["peak"]["times"] = ["not a dict"]
         with self.assertRaises(ValueError) as cm:
@@ -261,7 +261,6 @@ class ConfigValidationTests(unittest.TestCase):
     def test_time_format_validation(self):
         """Test time format validation."""
         config = self.valid_config.copy()
-        
         # Invalid time format - no colon
         config["tariffs"]["peak"]["times"] = [{"start": "1400", "end": "20:00"}]
         with self.assertRaises(ValueError) as cm:
@@ -289,12 +288,14 @@ class ConfigValidationTests(unittest.TestCase):
     def test_public_holidays_validation(self):
         """Test public holidays section validation."""
         config = self.valid_config.copy()
-        
         # Invalid type
         config["public_holidays"] = "not a dict"
         with self.assertRaises(ValueError) as cm:
             validate_config(config)
-        self.assertIn("public_holidays configuration must be a dictionary", str(cm.exception))
+        self.assertIn(
+            "public_holidays configuration must be a dictionary",
+            str(cm.exception)
+        )
 
         # Missing country
         config["public_holidays"] = {"region": "NSW"}
