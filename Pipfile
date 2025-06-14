@@ -10,6 +10,15 @@ click = "*"
 holidays = "*"
 
 [dev-packages]
+black = "*"
+flake8 = "*"
+mypy = "*"
+pytest = "*"
+pytest-cov = "*"
+isort = "*"
+types-PyYAML = "*"
+types-requests = "*"
+types-python-dateutil = "*"
 
 [requires]
 python_version = "3.10"

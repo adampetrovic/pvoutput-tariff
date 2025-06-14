@@ -1,0 +1,44 @@
+pvoutput:
+  extended_param: v12
+public_holidays:
+  country: AU
+  region: NSW
+tariffs:
+  # precedence matters (code will check each tariff in order and stop as soon as it matches criteria)
+  # off-peak is a special tariff as it is the catch-all if nothing else matches
+  peak_season:
+    price: 62.9475
+    dates:
+      # summer
+      - start_date: 2023-11-01
+        end_date: 2024-03-31
+      # winter
+      - start_date: 2024-06-01
+        end_date: 2024-08-31
+    times:
+      - start: '15:00'
+        end: '21:00'
+  peak_offseason:
+    price: 62.9475
+    weekends_only: true
+    dates:
+      - start_date: 2024-04-01
+        end_date: 2024-05-31
+      - start_date: 2024-09-01
+        end_date: 2024-10-31
+    times:
+      - start: '15:00'
+        end: '21:00'
+  ev_offpeak:
+    price: 8.39993
+    times:
+      - start: '00:00'
+        end: '06:00'
+  super_offpeak:
+    price: 0.0
+    times:
+      - start: '11:00'
+        end: '14:00'
+  offpeak:
+    price: 36.7290
+    times: []

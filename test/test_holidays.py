@@ -1,9 +1,9 @@
 import os
 import unittest
-from pathlib import Path
 from datetime import date
+from pathlib import Path
 
-from uploader import load_config, is_public_holiday
+from uploader import is_public_holiday, load_config
 
 
 class HolidayTest(unittest.TestCase):
@@ -12,7 +12,11 @@ class HolidayTest(unittest.TestCase):
         self.config = load_config(os.path.join(root, "config.yaml"))
 
     def test_public_holiday(self):
-        self.assertTrue(is_public_holiday(self.config['public_holidays'], date(2024, 1, 1)))
+        self.assertTrue(
+            is_public_holiday(self.config["public_holidays"], date(2024, 1, 1))
+        )
 
     def test_not_public_holiday(self):
-        self.assertFalse(is_public_holiday(self.config['public_holidays'], date(2024, 12, 24)))
+        self.assertFalse(
+            is_public_holiday(self.config["public_holidays"], date(2024, 12, 24))
+        )
