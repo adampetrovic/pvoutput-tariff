@@ -1,0 +1,314 @@
+name: Docker Build & Publish
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*.*.*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      push_image:
+        description: "Push image to registry"
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  security-events: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  PYTHON_VERSION: "3.12"
+  PIPENV_VENV_IN_PROJECT: 1
+
+jobs:
+  pre-build-checks:
+    name: Pre-build Checks
+    runs-on: ubuntu-latest
+    outputs:
+      should-build: ${{ steps.changes.outputs.docker || github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for relevant changes
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            docker:
+              - 'Dockerfile'
+              - 'Pipfile'
+              - 'Pipfile.lock'
+              - 'uploader.py'
+              - 'config_schema.py'
+              - '.github/workflows/docker.yml'
+
+      - name: Set up Python
+        if: steps.changes.outputs.docker == 'true' || github.event_name != 'pull_request'
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        if: steps.changes.outputs.docker == 'true' || github.event_name != 'pull_request'
+        run: |
+          python -m pip install --upgrade pip pipenv
+          pipenv install --dev
+
+      - name: Run basic tests
+        if: steps.changes.outputs.docker == 'true' || github.event_name != 'pull_request'
+        run: |
+          pipenv run pytest test/ -x --tb=short
+
+      - name: Lint Dockerfile
+        if: steps.changes.outputs.docker == 'true' || github.event_name != 'pull_request'
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          format: sarif
+          output-file: hadolint-results.sarif
+
+      - name: Upload Dockerfile lint results
+        if: always() && (steps.changes.outputs.docker == 'true' || github.event_name != 'pull_request')
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: hadolint-results.sarif
+
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: pre-build-checks
+    if: needs.pre-build-checks.outputs.should-build == 'true'
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+      image-metadata: ${{ steps.meta.outputs.json }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+
+      - name: Log into registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha,prefix={{branch}}-,suffix=-{{date 'YYYYMMDD-HHmmss'}}
+            type=raw,value=latest,enable={{is_default_branch}}
+          labels: |
+            org.opencontainers.image.title=PVOutput Tariff Uploader
+            org.opencontainers.image.description=Uploads electricity tariff prices to PVOutput
+            org.opencontainers.image.vendor=${{ github.repository_owner }}
+            org.opencontainers.image.licenses=MIT
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' || github.event.inputs.push_image == 'true' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: true
+          sbom: true
+          build-args: |
+            BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+            REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+
+      - name: Output image details
+        run: |
+          echo "Image digest: ${{ steps.build.outputs.digest }}"
+          echo "Image metadata: ${{ steps.meta.outputs.json }}"
+
+  test-image:
+    name: Test Docker Image
+    runs-on: ubuntu-latest
+    needs: build
+    if: needs.build.result == 'success'
+    strategy:
+      matrix:
+        platform: [linux/amd64, linux/arm64]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build test image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: ${{ matrix.platform }}
+          load: true
+          tags: test-image:latest
+          cache-from: type=gha
+          target: runtime
+
+      - name: Test image security
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: test-image:latest
+          format: sarif
+          output: trivy-results.sarif
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+
+      - name: Test container functionality
+        run: |
+          # Test that the container starts properly
+          docker run --rm test-image:latest --help
+          
+          # Test with a sample config (should fail gracefully without API keys)
+          echo "Testing container with sample config..."
+          docker run --rm \
+            -v ${{ github.workspace }}/test/config.yaml:/config/config.yaml:ro \
+            test-image:latest \
+            --config /config/config.yaml || true
+
+      - name: Test container as non-root
+        run: |
+          docker run --rm --user 1000:1000 test-image:latest --help
+
+  sign-image:
+    name: Sign Container Image
+    runs-on: ubuntu-latest
+    needs: [build, test-image]
+    if: github.event_name != 'pull_request' && needs.build.result == 'success' && needs.test-image.result == 'success'
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: v2.2.3
+
+      - name: Log into registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Sign container image
+        env:
+          DIGEST: ${{ needs.build.outputs.image-digest }}
+          TAGS: ${{ fromJSON(needs.build.outputs.image-metadata).tags }}
+        run: |
+          images=""
+          for tag in ${TAGS}; do
+            images+="${tag}@${DIGEST} "
+          done
+          cosign sign --yes ${images}
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: build
+    if: needs.build.result == 'success'
+    permissions:
+      security-events: write
+    steps:
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.build.outputs.image-digest }}
+          format: sarif
+          output: trivy-results.sarif
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+
+      - name: Run Snyk to check Docker image for vulnerabilities
+        continue-on-error: true
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.build.outputs.image-digest }}
+          args: --severity-threshold=high --file=Dockerfile
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build, test-image, security-scan]
+    if: github.ref == 'refs/heads/main' && needs.build.result == 'success' && needs.test-image.result == 'success'
+    environment:
+      name: staging
+      url: https://staging.example.com
+    steps:
+      - name: Deploy to staging
+        run: |
+          echo "🚀 Deploying to staging environment..."
+          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.build.outputs.image-digest }}"
+          # Add your deployment logic here
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build, test-image, security-scan, sign-image]
+    if: startsWith(github.ref, 'refs/tags/v') && needs.build.result == 'success' && needs.test-image.result == 'success' && needs.sign-image.result == 'success'
+    environment:
+      name: production
+      url: https://production.example.com
+    steps:
+      - name: Deploy to production
+        run: |
+          echo "🚀 Deploying to production environment..."
+          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.build.outputs.image-digest }}"
+          # Add your deployment logic here
+
+  cleanup:
+    name: Cleanup
+    runs-on: ubuntu-latest
+    needs: [build, test-image, security-scan]
+    if: always() && github.event_name == 'pull_request'
+    steps:
+      - name: Delete PR images
+        continue-on-error: true
+        run: |
+          echo "🧹 Cleaning up PR images..."
+          # Add cleanup logic for PR images if needed
